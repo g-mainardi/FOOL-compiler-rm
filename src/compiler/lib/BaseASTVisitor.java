@@ -69,13 +69,13 @@ public class BaseASTVisitor<S,E extends Exception> {
 	
 	// OPERATOR EXTENSION
 	
-	public S visitNode(GreaterEqualNode n) throws E {throw new UnimplException();}
-	public S visitNode(LessEqualNode n) throws E {throw new UnimplException();}
+//	public S visitNode(GreaterEqualNode n) throws E {throw new UnimplException();}
+//	public S visitNode(LessEqualNode n) throws E {throw new UnimplException();}
 	public S visitNode(NotNode n) throws E {throw new UnimplException();}
 	public S visitNode(MinusNode n) throws E {throw new UnimplException();}
-	public S visitNode(OrNode n) throws E {throw new UnimplException();}
-	public S visitNode(DivNode n) throws E {throw new UnimplException();}
-	public S visitNode(AndNode n) throws E {throw new UnimplException();}
+//	public S visitNode(OrNode n) throws E {throw new UnimplException();}
+//	public S visitNode(DivNode n) throws E {throw new UnimplException();}
+//	public S visitNode(AndNode n) throws E {throw new UnimplException();}
 	
 	// OBJECT-ORIENTED EXTENSION
 	
