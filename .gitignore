@@ -27,3 +27,10 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### antlr generated code ###
+gen
+
+### Configurations ###
+*.xml
+*.iml
