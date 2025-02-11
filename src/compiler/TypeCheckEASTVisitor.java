@@ -93,6 +93,16 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	}
 
 	@Override
+	public TypeNode visitNode(LessEqualNode n) throws TypeException {
+		if (print) printNode(n);
+		TypeNode l = visit(n.left);
+		TypeNode r = visit(n.right);
+		if ( !(isSubtype(l, r) || isSubtype(r, l)) )
+			throw new TypeException("Incompatible types in equal",n.getLine());
+		return new BoolTypeNode();
+	}
+
+	@Override
 	public TypeNode visitNode(NotNode n) throws TypeException {
 		if (print) printNode(n);
 		TypeNode e = visit(n.exp);
@@ -100,6 +110,17 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 			throw new TypeException("Wrong type for not",n.getLine());
 		return new BoolTypeNode();
 	}
+
+	@Override
+	public TypeNode visitNode(AndNode n) throws TypeException {
+		if (print) printNode(n);
+		TypeNode l = visit(n.left);
+		TypeNode r = visit(n.right);
+		if ( !(isSubtype(l, new BoolTypeNode()) && isSubtype(r, new BoolTypeNode())) )
+			throw new TypeException("Non booleans in and",n.getLine());
+		return new BoolTypeNode();
+	}
+
 
 	@Override
 	public TypeNode visitNode(TimesNode n) throws TypeException {
