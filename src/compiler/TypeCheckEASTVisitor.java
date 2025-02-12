@@ -102,6 +102,15 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		return new BoolTypeNode();
 	}
 
+	public TypeNode visitNode(GreaterEqualNode n) throws TypeException {
+		if (print) printNode(n);
+		TypeNode l = visit(n.left);
+		TypeNode r = visit(n.right);
+		if ( !(isSubtype(l, r) || isSubtype(r, l)) )
+			throw new TypeException("Incompatible types in equal",n.getLine());
+		return new BoolTypeNode();
+	}
+
 	@Override
 	public TypeNode visitNode(NotNode n) throws TypeException {
 		if (print) printNode(n);
@@ -121,6 +130,14 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		return new BoolTypeNode();
 	}
 
+	public TypeNode visitNode(OrNode n) throws TypeException {
+		if (print) printNode(n);
+		TypeNode l = visit(n.left);
+		TypeNode r = visit(n.right);
+		if ( !(isSubtype(l, new BoolTypeNode()) && isSubtype(r, new BoolTypeNode())) )
+			throw new TypeException("Non booleans in and",n.getLine());
+		return new BoolTypeNode();
+	}
 
 	@Override
 	public TypeNode visitNode(TimesNode n) throws TypeException {
@@ -128,6 +145,14 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if ( !(isSubtype(visit(n.left), new IntTypeNode())
 				&& isSubtype(visit(n.right), new IntTypeNode())) )
 			throw new TypeException("Non integers in multiplication",n.getLine());
+		return new IntTypeNode();
+	}
+
+	public TypeNode visitNode(DivNode n) throws TypeException {
+		if (print) printNode(n);
+		if ( !(isSubtype(visit(n.left), new IntTypeNode())
+				&& isSubtype(visit(n.right), new IntTypeNode())) )
+			throw new TypeException("Non integers in division",n.getLine());
 		return new IntTypeNode();
 	}
 
