@@ -282,12 +282,12 @@ public class AST {
 		final String methodId;
 		final List<Node> arglist;
 		STentry entry;
-		int nestingLevel;
-		ClassCallNode(String ci, String mi, List<Node> p, int nl) {
+		int nestinglevel;
+
+		ClassCallNode(String ci, String mi, List<Node> p) {
 			classId = ci;
 			methodId = mi;
 			arglist = Collections.unmodifiableList(p);
-			nestingLevel = nl;
 		}
 
 		@Override
