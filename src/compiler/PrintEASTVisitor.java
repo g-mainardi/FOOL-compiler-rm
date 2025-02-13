@@ -186,7 +186,48 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 		printNode(n);
 		return null;
 	}
-	
+
+	// OBJECT-ORIENTED EXTENSION
+
+	@Override
+	public Void visitNode(ClassNode n) throws VoidException {
+		printNode(n, n.id);
+		for (FieldNode field: n.fieldlist) visit(field);
+		for (MethodNode method: n.methodlist) visit(method);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(FieldNode n) throws VoidException {
+		printNode(n, n.id);
+		visit(n.getType());
+		return null;
+	}
+
+	@Override
+	public Void visitNode(MethodNode n) throws VoidException {
+		printNode(n,n.id);
+		visit(n.retType);
+		for (ParNode par: n.parlist) visit(par);
+		for (DecNode dec : n.declist) printNode(dec);
+		visit(n.exp);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(ClassCallNode n) throws VoidException {
+		printNode(n, n.classId + "." + n.methodId);
+		for (Node arg : n.arglist) visit(arg);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(NewNode n) throws VoidException {
+		printNode(n,n.id);
+		for (Node arg : n.argList) visit(arg);
+		return null;
+	}
+
 	@Override
 	public Void visitSTentry(STentry entry) {
 		printSTentry("nestlev "+entry.nl);
