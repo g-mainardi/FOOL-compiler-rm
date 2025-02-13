@@ -79,10 +79,10 @@ public class BaseASTVisitor<S,E extends Exception> {
 	
 	// OBJECT-ORIENTED EXTENSION
 	
-//	public S visitNode(ClassNode n) throws E {throw new UnimplException();}
-//	public S visitNode(FieldNode node) throws E {throw new UnimplException();}
-//	public S visitNode(MethodNode n) throws E {throw new UnimplException();}
-//	public S visitNode(ClassCallNode node) throws E {throw new UnimplException();}
+	public S visitNode(ClassNode n) throws E {throw new UnimplException();}
+	public S visitNode(FieldNode node) throws E {throw new UnimplException();}
+	public S visitNode(MethodNode n) throws E {throw new UnimplException();}
+	public S visitNode(ClassCallNode node) throws E {throw new UnimplException();}
 //	public S visitNode(NewNode n) throws E {throw new UnimplException();}
 //	public S visitNode(EmptyNode n) throws E {throw new UnimplException();}
 //
