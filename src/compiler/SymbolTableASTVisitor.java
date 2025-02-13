@@ -8,6 +8,7 @@ import compiler.lib.*;
 public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	
 	private List<Map<String, STentry>> symTable = new ArrayList<>();
+	private Map<String, Map<String, STentry>> classTable = new HashMap<>();
 	private int nestingLevel=0; // current nesting level
 	private int decOffset=-2; // counter for offset of local declarations at current nesting level 
 	int stErrors=0;
@@ -218,6 +219,46 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	@Override
 	public Void visitNode(IntNode n) {
 		if (print) printNode(n, n.val.toString());
+		return null;
+	}
+
+	// OBJECT-ORIENTED EXTENSION
+
+	@Override
+	public Void visitNode(ClassNode n) throws VoidException {
+		if (print) printNode(n);
+
+		Map<String, STentry> globalSymTable = symTable.get(0);
+
+		List<TypeNode> fieldTypes = new ArrayList<>();
+//		for (FieldNode field : n.fieldList) fieldTypes.add(field.getType());
+
+		List<ArrowTypeNode> methodTypes = new ArrayList<>();
+//		for (MethodNode method : n.methodList) methodTypes.add((ArrowTypeNode) method.getType());
+
+        STentry entry = new STentry(0, new ClassTypeNode(fieldTypes, methodTypes), decOffset--);
+		if (globalSymTable.put(n.id, entry) != null) {
+			System.out.println("Class id " + n.id + " at line "+ n.getLine() +" already declared");
+			stErrors++;
+		}
+
+		nestingLevel++;
+		Map<String, STentry> virtualTable = new HashMap<>();
+		symTable.add(virtualTable);
+		classTable.put(n.id, virtualTable);
+
+		decOffset = -2;
+		int prevNLDecOffset = decOffset;
+
+		for (FieldNode field : n.fieldList) {
+			virtualTable.put(field.id, new STentry(nestingLevel, field.getType(), decOffset));
+		}
+
+		for (MethodNode method : n.methodList) visit(method);
+
+
+
+
 		return null;
 	}
 }
