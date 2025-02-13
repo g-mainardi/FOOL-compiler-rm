@@ -224,4 +224,29 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		n.setLine(c.ID().getSymbol().getLine());
 		return n;
 	}
+
+	public Node visitCldec(CldecContext c) {
+		if (print) printVarAndProdName(c);
+
+		// Fields
+		List<FieldNode> fieldlist = new ArrayList<>();
+		int startingPoint = (c.EXTENDS() == null) ? 1 : 2;
+		for (int i = startingPoint; i < c.ID().size(); i++) {
+			FieldNode f = new FieldNode(c.ID(i).getText(),(TypeNode) visit(c.type(i)));
+			f.setLine(c.ID(i).getSymbol().getLine());
+			fieldlist.add(f);
+		}
+
+		// Methods
+		List<MethodNode> methodlist = new ArrayList<>();
+		for (MethdecContext dec : c.methdec()) methodlist.add((MethodNode) visit(dec));
+
+		// Class
+		Node n = null;
+		if (c.ID().size()>0) { //non-incomplete ST
+			n = new ClassNode(c.ID(0).getText(),fieldlist,methodlist);
+			n.setLine(c.CLASS().getSymbol().getLine());
+		}
+		return n;
+	}
 }
