@@ -213,7 +213,7 @@ public class AST {
 		final List<TypeNode> parlist;
 		final TypeNode ret;
 		ArrowTypeNode(List<TypeNode> p, TypeNode r) {
-			parlist = Collections.unmodifiableList(p); 
+			parlist = Collections.unmodifiableList(p);
 			ret = r;
 		}
 
@@ -237,12 +237,12 @@ public class AST {
 
 	public static class ClassNode extends DecNode {
 		final String id;
-		final List<FieldNode> fieldlist;
-		final List<MethodNode> methodlist;
+		final List<FieldNode> fieldList;
+		final List<MethodNode> methodList;
 		ClassNode(String i, List<FieldNode> f, List<MethodNode> m) {
 			id = i;
-			fieldlist = Collections.unmodifiableList(f);
-			methodlist = Collections.unmodifiableList(m);
+			fieldList = Collections.unmodifiableList(f);
+			methodList = Collections.unmodifiableList(m);
 		}
 
 		@Override
@@ -260,14 +260,14 @@ public class AST {
 	public static class MethodNode extends DecNode {
 		final String id;
 		final TypeNode retType;
-		final List<ParNode> parlist;
-		final List<DecNode> declist;
+		final List<ParNode> parList;
+		final List<DecNode> decList;
 		final Node exp;
 		MethodNode(String i, TypeNode rt, List<ParNode> pl, List<DecNode> dl, Node e) {
 			id=i;
 			retType=rt;
-			parlist=Collections.unmodifiableList(pl);
-			declist=Collections.unmodifiableList(dl);
+			parList =Collections.unmodifiableList(pl);
+			decList =Collections.unmodifiableList(dl);
 			exp=e;
 		}
 
@@ -280,7 +280,7 @@ public class AST {
 	public static class ClassCallNode extends Node {
 		final String classId;
 		final String methodId;
-		final List<Node> arglist;
+		final List<Node> argList;
 
 		// Campi per il Symbol Table Visitor
 		STentry entry;
@@ -289,7 +289,7 @@ public class AST {
 		ClassCallNode(String ci, String mi, List<Node> p) {
 			classId = ci;
 			methodId = mi;
-			arglist = Collections.unmodifiableList(p);
+			argList = Collections.unmodifiableList(p);
 		}
 
 		@Override
@@ -309,4 +309,34 @@ public class AST {
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
+
+	// OBJECT-ORIENTED EXTENSION TYPES
+
+	public static class ClassTypeNode extends TypeNode {
+		final List<TypeNode> allFields;
+		final List<ArrowTypeNode> allMethods;
+
+		ClassTypeNode(List<TypeNode> f, List<ArrowTypeNode> m) {
+			allFields = Collections.unmodifiableList(f);
+			allMethods = Collections.unmodifiableList(m);
+		}
+
+		@Override
+		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
+	}
+
+	public static class RefTypeNode extends TypeNode {
+		final String id;
+
+		RefTypeNode(String i) {id = i;}
+
+		@Override
+		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
+	}
+
+	public static class EmptyTypeNode extends TypeNode {
+		@Override
+		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
+	}
+
 }
