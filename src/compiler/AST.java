@@ -281,6 +281,8 @@ public class AST {
 		final String classId;
 		final String methodId;
 		final List<Node> arglist;
+
+		// Campi per il Symbol Table Visitor
 		STentry entry;
 		int nestinglevel;
 
