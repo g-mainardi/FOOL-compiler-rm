@@ -225,6 +225,8 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		return n;
 	}
 
+	// OBJECT-ORIENTED EXTENSION
+
 	public Node visitCldec(CldecContext c) {
 		if (print) printVarAndProdName(c);
 
