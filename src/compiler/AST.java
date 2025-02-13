@@ -298,5 +298,8 @@ public class AST {
 
 //	public static class NewNode extends Node {}
 
-//	public static class EmptyNode extends Node {}
+	public static class EmptyNode extends Node {
+		@Override
+		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
+	}
 }
