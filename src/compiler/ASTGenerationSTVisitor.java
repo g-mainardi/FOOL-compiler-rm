@@ -228,20 +228,22 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 	public Node visitCldec(CldecContext c) {
 		if (print) printVarAndProdName(c);
 
-		// Fields
-		List<FieldNode> fieldlist = new ArrayList<>();
+		// Se la classe eredita da un'altra, gli ID dei campi iniziano dopo
 		int startingPoint = (c.EXTENDS() == null) ? 1 : 2;
+
+		// Fields visits
+		List<FieldNode> fieldlist = new ArrayList<>();
 		for (int i = startingPoint; i < c.ID().size(); i++) {
 			FieldNode f = new FieldNode(c.ID(i).getText(),(TypeNode) visit(c.type(i)));
 			f.setLine(c.ID(i).getSymbol().getLine());
 			fieldlist.add(f);
 		}
 
-		// Methods
+		// Methods visits
 		List<MethodNode> methodlist = new ArrayList<>();
 		for (MethdecContext dec : c.methdec()) methodlist.add((MethodNode) visit(dec));
 
-		// Class
+		// Class Node creation
 		Node n = null;
 		if (c.ID().size()>0) { //non-incomplete ST
 			n = new ClassNode(c.ID(0).getText(),fieldlist,methodlist);
@@ -253,7 +255,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 	public Node visitMethdec(MethdecContext c) {
 		if (print) printVarAndProdName(c);
 
-		// Parameters
+		// Parameters visits
 		List<ParNode> parList = new ArrayList<>();
 		for (int i = 1; i < c.ID().size(); i++) {
 			ParNode p = new ParNode(c.ID(i).getText(),(TypeNode) visit(c.type(i)));
@@ -261,11 +263,11 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 			parList.add(p);
 		}
 
-		// Declarations
+		// Declarations visits
 		List<DecNode> decList = new ArrayList<>();
 		for (DecContext dec : c.dec()) decList.add((DecNode) visit(dec));
 
-		// Method
+		// Method Node creation
 		Node n = null;
 		if (c.ID().size()>0) { //non-incomplete ST
 			n = new MethodNode(c.ID(0).getText(),(TypeNode)visit(c.type(0)),parList,decList,visit(c.exp()));
@@ -278,11 +280,11 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 	public Node visitDotCall(DotCallContext c) {
 		if (print) printVarAndProdName(c);
 
-		// Arguments
+		// Arguments visits
 		List<Node> arglist = new ArrayList<>();
 		for (ExpContext arg : c.exp()) arglist.add(visit(arg));
 
-		// Call
+		// ClassCall Node creation
 		Node n = new ClassCallNode(c.ID().get(0).getText(), c.ID().get(1).getText(), arglist);
 		n.setLine(c.ID().get(0).getSymbol().getLine());
 		return n;
