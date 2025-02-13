@@ -294,7 +294,14 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
-//	public static class NewNode extends Node {}
+	public static class NewNode extends Node {
+		String id;
+		List<Node> argList;
+		NewNode(String i, List<Node> args) {id = i; argList = Collections.unmodifiableList(args);}
+
+		@Override
+		public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {return visitor.visitNode(this);}
+	}
 
 //	public static class EmptyNode extends Node {}
 }
