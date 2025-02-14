@@ -311,4 +311,13 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		n.setLine(ctx.ID().getSymbol().getLine());
 		return n;
 	}
+
+	@Override
+	public Node visitIdType(IdTypeContext ctx) {
+		if (print) printVarAndProdName(ctx);
+
+		Node n = new RefTypeNode(ctx.ID().getText());
+		n.setLine(ctx.ID().getSymbol().getLine());
+		return n;
+	}
 }
