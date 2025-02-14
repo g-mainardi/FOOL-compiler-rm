@@ -27,8 +27,8 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	public Void visitNode(FunNode n) {
 		printNode(n,n.id);
 		visit(n.retType);
-		for (ParNode par : n.parlist) visit(par);
-		for (Node dec : n.declist) visit(dec);
+		for (ParNode par : n.parList) visit(par);
+		for (Node dec : n.decList) visit(dec);
 		visit(n.exp);
 		return null;
 	}
@@ -192,8 +192,8 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	@Override
 	public Void visitNode(ClassNode n) throws VoidException {
 		printNode(n, n.id);
-		for (FieldNode field: n.fieldlist) visit(field);
-		for (MethodNode method: n.methodlist) visit(method);
+		for (FieldNode field: n.fieldList) visit(field);
+		for (MethodNode method: n.methodList) visit(method);
 		return null;
 	}
 
@@ -208,8 +208,8 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	public Void visitNode(MethodNode n) throws VoidException {
 		printNode(n,n.id);
 		visit(n.retType);
-		for (ParNode par: n.parlist) visit(par);
-		for (DecNode dec : n.declist) printNode(dec);
+		for (ParNode par: n.parList) visit(par);
+		for (DecNode dec : n.decList) printNode(dec);
 		visit(n.exp);
 		return null;
 	}
@@ -217,7 +217,7 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	@Override
 	public Void visitNode(ClassCallNode n) throws VoidException {
 		printNode(n, n.classId + "." + n.methodId);
-		for (Node arg : n.arglist) visit(arg);
+		for (Node arg : n.argList) visit(arg);
 		return null;
 	}
 

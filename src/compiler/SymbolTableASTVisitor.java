@@ -1,6 +1,8 @@
 package compiler;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
 import compiler.AST.*;
 import compiler.exc.*;
 import compiler.lib.*;
@@ -84,7 +86,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 
 		// Colleziono i tipi dei parametri
 		List<TypeNode> parTypes = new ArrayList<>();
-		for (ParNode par : n.parlist) parTypes.add(par.getType());
+		for (ParNode par : n.parList) parTypes.add(par.getType());
 
 		// Creo un STentry con: nesting level, Tipo e Offset
 		STentry entry = new STentry(nestingLevel, new ArrowTypeNode(parTypes,n.retType),decOffset--);
@@ -107,14 +109,14 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 
 		// Imposto l'offset per i parametri (verso l'alto) e li metto nella nuova HashMap
 		int parOffset=1;
-		for (ParNode par : n.parlist)
+		for (ParNode par : n.parList)
 			if (hmn.put(par.id, new STentry(nestingLevel,par.getType(),parOffset++)) != null) {
 				System.out.println("Par id " + par.id + " at line "+ n.getLine() +" already declared");
 				stErrors++;
 			}
 
 		// Visito le dichiarazioni della funzione (let)
-		for (Node dec : n.declist) visit(dec);
+		for (Node dec : n.decList) visit(dec);
 
 		// Visito l'espressione della funzione (in)
 		visit(n.exp);
@@ -300,15 +302,13 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		Map<String, STentry> globalSymTable = symTable.get(0);
 
 		// Array vuoto per i tipi dei campi
-		List<TypeNode> fieldTypes = new ArrayList<>();
-//		for (FieldNode field : n.fieldList) fieldTypes.add(field.getType());
+		List<TypeNode> allFields = new ArrayList<>();
 
 		// Array vuoto per i tipi dei metodi
-		List<ArrowTypeNode> methodTypes = new ArrayList<>();
-//		for (MethodNode method : n.methodList) methodTypes.add((ArrowTypeNode) method.getType());
+		List<ArrowTypeNode> allMethods = new ArrayList<>();
 
 		// Creo un STentry con: nesting level, liste dei tipi (campi e metodi) e Offset
-		STentry entry = new STentry(0, new ClassTypeNode(fieldTypes, methodTypes), decOffset--);
+		STentry entry = new STentry(0, new ClassTypeNode(allFields, allMethods), decOffset--);
 
 		// Inserisco il mio ID + entry nella SymbolTable
 		if (globalSymTable.put(n.id, entry) != null) {
@@ -321,18 +321,68 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		symTable.add(virtualTable);
 		classTable.put(n.id, virtualTable);
 
-		decOffset = -2;
-		int prevNLDecOffset = decOffset;
-
+		int fieldOffset = -1;
 		for (FieldNode field : n.fieldList) {
-			virtualTable.put(field.id, new STentry(nestingLevel, field.getType(), decOffset));
+			if (print) printNode(field);
+			STentry fieldEntry = new STentry(nestingLevel, field.getType(), fieldOffset--);
+			if (virtualTable.put(field.id, fieldEntry) != null) {
+				System.out.println("Field id " +  field.id + " at line " + field.getLine() + " already declared");
+				stErrors++;
+			}
+			allFields.add(-fieldOffset - 1, field.getType());
 		}
 
-		for (MethodNode method : n.methodList) visit(method);
+		int methodOffset = 0;
+		for (MethodNode method : n.methodList) {
+			visit(method);
 
+			List<TypeNode> parTypes = new ArrayList<>();
+			for (ParNode par : method.parList) parTypes.add(par.getType());
 
+			STentry methodEntry = new STentry(nestingLevel, new ArrowTypeNode(parTypes, method.retType), methodOffset++);
+			if (virtualTable.put(method.id, methodEntry) != null) {
+				System.out.println("Method id " +  method.id + " at line " + method.getLine() + " already declared");
+				stErrors++;
+			}
+			allMethods.add(methodOffset, (ArrowTypeNode) method.getType());
+		}
 
+		symTable.remove(nestingLevel--);
 
+		return null;
+	}
+
+	@Override
+	public Void visitNode(MethodNode n) throws VoidException {
+		if (print) printNode(n);
+
+		nestingLevel++;
+		Map<String, STentry> methodScope = new HashMap<>();
+		symTable.add(methodScope);
+
+		// Salvo l'offset di questo livello prima di resettare per il prossimo
+		int prevNLDecOffset=decOffset;
+		decOffset=-2;
+
+		// Imposto l'offset per i parametri (verso l'alto) e li metto nella nuova HashMap
+		int parOffset=1;
+		for (ParNode par : n.parList)
+			if (methodScope.put(par.id, new STentry(nestingLevel,par.getType(),parOffset++)) != null) {
+				System.out.println("Par id " + par.id + " at line "+ n.getLine() +" already declared");
+				stErrors++;
+			}
+
+		// Visito le dichiarazioni della funzione (let)
+		for (Node dec : n.decList) visit(dec);
+
+		// Visito l'espressione della funzione (in)
+		visit(n.exp);
+
+		// Rimuovo l'HashMap perché esco dallo scope interno
+		symTable.remove(nestingLevel--);
+
+		// Ripristino l'offset precedente
+		decOffset=prevNLDecOffset;
 		return null;
 	}
 }

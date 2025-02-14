@@ -28,14 +28,14 @@ public class AST {
 	public static class FunNode extends DecNode {
 		final String id;
 		final TypeNode retType;
-		final List<ParNode> parlist;
-		final List<DecNode> declist; 
+		final List<ParNode> parList;
+		final List<DecNode> decList;
 		final Node exp;
 		FunNode(String i, TypeNode rt, List<ParNode> pl, List<DecNode> dl, Node e) {
 	    	id=i; 
 	    	retType=rt; 
-	    	parlist=Collections.unmodifiableList(pl); 
-	    	declist=Collections.unmodifiableList(dl); 
+	    	parList =Collections.unmodifiableList(pl);
+	    	decList =Collections.unmodifiableList(dl);
 	    	exp=e;
 	    }
 		
@@ -271,7 +271,7 @@ public class AST {
 			exp=e;
 		}
 
-		//void setType(TypeNode t) {type = t;}
+		void setType(TypeNode t) {type = t;}
 
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
