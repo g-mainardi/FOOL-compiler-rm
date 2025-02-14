@@ -281,16 +281,16 @@ public class AST {
 	}
 
 	public static class ClassCallNode extends Node {
-		final String classId;
+		final String refId;
 		final String methodId;
 		final List<Node> argList;
 
 		// Campi per il Symbol Table Visitor
 		STentry entry;
-		int nestinglevel;
+		int nestingLevel;
 
-		ClassCallNode(String ci, String mi, List<Node> p) {
-			classId = ci;
+		ClassCallNode(String ri, String mi, List<Node> p) {
+			refId = ri;
 			methodId = mi;
 			argList = Collections.unmodifiableList(p);
 		}

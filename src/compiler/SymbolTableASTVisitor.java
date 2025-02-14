@@ -399,4 +399,39 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		decOffset=prevNLDecOffset;
 		return null;
 	}
+
+	@Override
+	public Void visitNode(ClassCallNode n) {
+		if (print) printNode(n);
+
+		// Cerco l'STentry della reference dal nesting level più alto a quello più basso
+		STentry entry = stLookup(n.refId);
+		if (entry == null) {
+			System.out.println("Reference id " + n.refId + " at line "+ n.getLine() + " not declared");
+			stErrors++;
+		}
+
+		String classId = ""; // entry.type RefTypeNode
+
+		// Prendo l'STentry del metodo dalla Class Table
+		STentry methodEntry = classTable.get(classId).get(n.methodId);
+		if (methodEntry == null) {
+			System.out.println("Method id " + n.refId + "." + n.methodId + " at line "+ n.getLine() + " not declared");
+			stErrors++;
+		} else {
+			// Se lo trovo, la salvo nel nodo
+			n.entry = methodEntry;
+			n.nestingLevel = nestingLevel;
+		}
+
+		// Visito gli argomenti del metodo
+		for (Node arg : n.argList) visit(arg);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(NewNode n) {
+		if (print) printNode(n);
+		return null;
+	}
 }
