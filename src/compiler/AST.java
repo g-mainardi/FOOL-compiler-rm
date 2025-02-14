@@ -263,12 +263,15 @@ public class AST {
 		final List<ParNode> parList;
 		final List<DecNode> decList;
 		final Node exp;
+		int offset;
+
 		MethodNode(String i, TypeNode rt, List<ParNode> pl, List<DecNode> dl, Node e) {
 			id=i;
 			retType=rt;
 			parList =Collections.unmodifiableList(pl);
 			decList =Collections.unmodifiableList(dl);
 			exp=e;
+			offset=0;
 		}
 
 		void setType(TypeNode t) {type = t;}

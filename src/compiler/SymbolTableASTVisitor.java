@@ -1,7 +1,6 @@
 package compiler;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import compiler.AST.*;
 import compiler.exc.*;
@@ -332,22 +331,20 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			allFields.add(-fieldOffset - 1, field.getType());
 		}
 
-		int methodOffset = 0;
+		// Salvo l'offset di questo livello prima di resettare per il prossimo
+		int prevNLDecOffset = decOffset;
+		decOffset = 0;
+
 		for (MethodNode method : n.methodList) {
 			visit(method);
-
-			List<TypeNode> parTypes = new ArrayList<>();
-			for (ParNode par : method.parList) parTypes.add(par.getType());
-
-			STentry methodEntry = new STentry(nestingLevel, new ArrowTypeNode(parTypes, method.retType), methodOffset++);
-			if (virtualTable.put(method.id, methodEntry) != null) {
-				System.out.println("Method id " +  method.id + " at line " + method.getLine() + " already declared");
-				stErrors++;
-			}
-			allMethods.add(methodOffset, (ArrowTypeNode) method.getType());
+			allMethods.add(method.offset, (ArrowTypeNode) method.getType());
 		}
 
+		// Rimuovo l'HashMap perché esco dallo scope interno
 		symTable.remove(nestingLevel--);
+
+		// Ripristino l'offset precedente
+		decOffset=prevNLDecOffset;
 
 		return null;
 	}
@@ -355,6 +352,23 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	@Override
 	public Void visitNode(MethodNode n) throws VoidException {
 		if (print) printNode(n);
+
+		// Prendo la HashMap per il nesting level corrente
+		Map<String, STentry> virtualTable = symTable.get(nestingLevel);
+
+		// Colleziono i tipi dei parametri
+		List<TypeNode> parTypes = new ArrayList<>();
+		for (ParNode par : n.parList) parTypes.add(par.getType());
+
+		// Creo un STentry con: nesting level, Tipo e Offset
+		STentry entry = new STentry(nestingLevel, new ArrowTypeNode(parTypes, n.retType), decOffset++);
+		n.offset = entry.offset;
+
+		// Inserisco l'ID del metodo + entry nella VirtualTable della classe
+		if (virtualTable.put(n.id, entry) != null) {
+			System.out.println("Method id " +  n.id + " at line " + n.getLine() + " already declared");
+			stErrors++;
+		}
 
 		nestingLevel++;
 		Map<String, STentry> methodScope = new HashMap<>();
