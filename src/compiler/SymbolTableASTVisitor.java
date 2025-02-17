@@ -328,7 +328,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 				System.out.println("Field id " +  field.id + " at line " + field.getLine() + " already declared");
 				stErrors++;
 			}
-			allFields.add(-fieldOffset - 1, field.getType());
+			allFields.add(-fieldEntry.offset - 1, field.getType());
 		}
 
 		// Salvo l'offset di questo livello prima di resettare per il prossimo
@@ -407,21 +407,20 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		// Cerco l'STentry della reference dal nesting level più alto a quello più basso
 		STentry entry = stLookup(n.refId);
 		if (entry == null) {
-			System.out.println("Reference id " + n.refId + " at line "+ n.getLine() + " not declared");
-			stErrors++;
-		}
-
-		String classId = ""; // entry.type RefTypeNode
-
-		// Prendo l'STentry del metodo dalla Class Table
-		STentry methodEntry = classTable.get(classId).get(n.methodId);
-		if (methodEntry == null) {
-			System.out.println("Method id " + n.refId + "." + n.methodId + " at line "+ n.getLine() + " not declared");
+			System.out.println("Reference id " + n.refId + " at line " + n.getLine() + " not declared");
 			stErrors++;
 		} else {
-			// Se lo trovo, la salvo nel nodo
-			n.entry = methodEntry;
-			n.nestingLevel = nestingLevel;
+			// Prendo l'STentry del metodo dalla Class Table
+			String classId = ((RefTypeNode) entry.type).id;
+			STentry methodEntry = classTable.get(classId).get(n.methodId);
+			if (methodEntry == null) {
+				System.out.println("Method id " + n.refId + "." + n.methodId + " at line "+ n.getLine() + " not declared");
+				stErrors++;
+			} else {
+				// Se lo trovo, la salvo nel nodo
+				n.entry = methodEntry;
+				n.nestingLevel = nestingLevel;
+			}
 		}
 
 		// Visito gli argomenti del metodo

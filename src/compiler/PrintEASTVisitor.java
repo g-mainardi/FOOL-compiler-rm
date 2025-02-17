@@ -229,6 +229,12 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	}
 
 	@Override
+	public Void visitNode(RefTypeNode n) throws VoidException {
+		printNode(n, n.id);
+		return null;
+	}
+
+	@Override
 	public Void visitSTentry(STentry entry) {
 		printSTentry("nestlev "+entry.nl);
 		printSTentry("type");
