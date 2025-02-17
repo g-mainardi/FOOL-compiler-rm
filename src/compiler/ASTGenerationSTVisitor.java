@@ -237,7 +237,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		// Fields visits
 		List<FieldNode> fieldlist = new ArrayList<>();
 		for (int i = startingPoint; i < c.ID().size(); i++) {
-			FieldNode f = new FieldNode(c.ID(i).getText(),(TypeNode) visit(c.type(i)));
+			FieldNode f = new FieldNode(c.ID(i).getText(),(TypeNode) visit(c.type(i-1)));
 			f.setLine(c.ID(i).getSymbol().getLine());
 			fieldlist.add(f);
 		}

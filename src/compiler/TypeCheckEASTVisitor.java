@@ -3,6 +3,9 @@ package compiler;
 import compiler.AST.*;
 import compiler.exc.*;
 import compiler.lib.*;
+
+import javax.management.relation.RelationTypeNotFoundException;
+
 import static compiler.TypeRels.*;
 
 //visitNode(n) fa il type checking di un Node n e ritorna:
@@ -135,7 +138,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		TypeNode l = visit(n.left);
 		TypeNode r = visit(n.right);
 		if ( !(isSubtype(l, new BoolTypeNode()) && isSubtype(r, new BoolTypeNode())) )
-			throw new TypeException("Non booleans in and",n.getLine());
+			throw new TypeException("Non booleans in or",n.getLine());
 		return new BoolTypeNode();
 	}
 
@@ -192,7 +195,9 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(IdNode n) throws TypeException {
 		if (print) printNode(n,n.id);
-		TypeNode t = visit(n.entry); 
+		TypeNode t = visit(n.entry);
+		if (t instanceof ClassTypeNode)
+			throw new TypeException("Wrong usage of a class identifier " + n.id,n.getLine());
 		if (t instanceof ArrowTypeNode)
 			throw new TypeException("Wrong usage of function identifier " + n.id,n.getLine());
 		return t;
@@ -232,7 +237,82 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		return null;
 	}
 
-// STentry (ritorna campo type)
+	// OBJECT-ORIENTED EXTENSION
+
+	@Override
+	public TypeNode visitNode(ClassNode n) throws TypeException {
+		if (print) printNode(n, n.id);
+		for (MethodNode method : n.methodList) {
+			visit(method);
+		}
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(MethodNode n) throws TypeException {
+		if (print) printNode(n, n.id);
+		for (DecNode dec : n.decList) {
+			try {
+				visit(dec);
+			} catch (IncomplException e) {
+			} catch (TypeException e) {
+				System.out.println("Type checking error in a declaration: " + e.text);
+			}
+		}
+		if (!isSubtype(visit(n.exp), ckvisit(n.retType)))
+			throw new TypeException("Wrong return type for method " + n.id, n.getLine());
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(ClassCallNode n) throws TypeException {
+		if (print) printNode(n, n.refId + "." + n.methodId);
+		TypeNode t = visit(n.entry);
+		if ( !(t instanceof ArrowTypeNode) )
+			throw new TypeException("Invocation of a non-function "+n.refId+"."+n.methodId,n.getLine());
+		ArrowTypeNode at = (ArrowTypeNode) t;
+		if ( !(at.parlist.size() == n.argList.size()) )
+			throw new TypeException("Wrong number of arguments in the invocation of "+n.refId+"."+n.methodId,n.getLine());
+		for (int i = 0; i < n.argList.size(); i++)
+			if ( !(isSubtype(visit(n.argList.get(i)),at.parlist.get(i))) )
+				throw new TypeException("Wrong type for "+(i+1)+"-th argument in the invocation of "
+						+n.refId+"."+n.methodId,n.getLine());
+		return at.ret;
+	}
+
+		@Override
+	public TypeNode visitNode(NewNode n) throws TypeException {
+		if (print) printNode(n, n.id);
+		for (int i = 0; i < n.argList.size(); i++) {
+            TypeNode paramType = ((ClassTypeNode) n.entry.type).allFields.get(i);
+			TypeNode actualParam = visit(n.argList.get(i));
+			if (!isSubtype(actualParam, paramType)) {
+				System.out.println("Incompatible type for argument " + i + " in class "
+						+ n.id + " constructor at line " + n.getLine());
+			}
+		}
+		return new RefTypeNode(n.id);
+	}
+
+	@Override
+	public TypeNode visitNode(RefTypeNode n) throws TypeException {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(ClassTypeNode n) throws TypeException {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(EmptyNode n) throws TypeException {
+		if (print) printNode(n);
+		return new EmptyTypeNode();
+	}
+
+	// STentry (ritorna campo type)
 
 	@Override
 	public TypeNode visitSTentry(STentry entry) throws TypeException {

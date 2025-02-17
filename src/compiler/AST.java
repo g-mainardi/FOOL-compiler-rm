@@ -302,6 +302,8 @@ public class AST {
 	public static class NewNode extends Node {
 		String id;
 		List<Node> argList;
+		STentry entry;
+		
 		NewNode(String i, List<Node> args) {id = i; argList = Collections.unmodifiableList(args);}
 
 		@Override
