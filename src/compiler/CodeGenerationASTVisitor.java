@@ -3,6 +3,9 @@ package compiler;
 import compiler.AST.*;
 import compiler.lib.*;
 import compiler.exc.*;
+
+import java.util.ArrayList;
+
 import static compiler.lib.FOOLlib.*;
 
 public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidException> {
@@ -285,4 +288,74 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 		if (print) printNode(n,n.val.toString());
 		return "push "+n.val;
 	}
+
+	// OBJECT-ORIENTED EXTENSION
+	@Override
+	public String visitNode(ClassNode n) {
+		if (print) printNode(n,n.id);
+		ArrayList<String> dispatchTable = new ArrayList<>();
+		String dispatchTableCode = "";
+
+		for (MethodNode method : n.methodList) {
+			visit(method);
+			String methodLabel = method.label;
+			dispatchTable.add(method.offset, methodLabel);
+
+			dispatchTableCode = nlJoin(
+					dispatchTableCode,
+					// Memorizzo l'indirizzo del metodo nell'Heap
+					"push " + methodLabel,
+					"lhp",
+					"sw",
+					// Incremento l'HP
+					"lhp",
+					"push 1",
+					"add",
+					"shp"
+			);
+		}
+
+		return nlJoin(
+				"lhp",
+				dispatchTableCode
+		);
+	}
+
+	@Override
+	public String visitNode(MethodNode n) {
+		if (print) printNode(n,n.id);
+		String declCode = null, popDecl = null, popParl = null;
+		for (Node dec : n.decList) {
+			declCode = nlJoin(declCode,visit(dec));
+			popDecl = nlJoin(popDecl,"pop");
+		}
+		for (int i = 0; i<n.parList.size(); i++) popParl = nlJoin(popParl,"pop");
+		n.label = freshFunLabel();
+		putCode(
+				nlJoin(
+						n.label+":",
+						"cfp", // set $fp to $sp value
+						"lra", // load $ra value
+						declCode, // generate code for local declarations (they use the new $fp!!!)
+						visit(n.exp), // generate code for function body expression
+						"stm", // set $tm to popped value (function result)
+						popDecl, // remove local declarations from stack
+						"sra", // set $ra to popped value
+						"pop", // remove Access Link from stack
+						popParl, // remove parameters from stack
+						"sfp", // set $fp to popped value (Control Link)
+						"ltm", // load $tm value (function result)
+						"lra", // load $ra value
+						"js"  // jump to popped address
+				)
+		);
+		return null;
+	}
+
+	@Override
+	public String visitNode(EmptyNode n) {
+		if (print) printNode(n);
+		return nlJoin("push -1");
+	}
+
 }
