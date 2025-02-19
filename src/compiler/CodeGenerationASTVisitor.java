@@ -7,6 +7,7 @@ import compiler.exc.*;
 import java.util.ArrayList;
 
 import static compiler.lib.FOOLlib.*;
+import static svm.ExecuteVM.MEMSIZE;
 
 public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidException> {
 
@@ -358,4 +359,27 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 		return nlJoin("push -1");
 	}
 
+	@Override
+	public String visitNode(ClassCallNode n) {
+		if (print) printNode(n);
+
+		String argCode = null, getAR = null;
+		for (int i=n.argList.size()-1;i>=0;i--) argCode=nlJoin(argCode,visit(n.argList.get(i)));
+		for (int i = 0;i<n.nestingLevel-n.entry.nl;i++) getAR=nlJoin(getAR,"lw");
+		return nlJoin(
+				"lfp", // load Control Link (pointer to frame of function "id" caller)
+				argCode, // generate code for argument expressions in reversed order
+				"lfp", getAR, // retrieve address of frame containing "id" declaration
+				"push "+n.entry.offset, "add", // compute address of "id" declaration
+				"lw", // load value of "id" variable
+				// by following the static chain (of Access Links)
+				"stm", // set $tm to popped value (with the aim of duplicating top of stack)
+				"ltm", // load Access Link (pointer to frame of function "id" declaration)
+				"ltm", // duplicate top of stack
+				// SIAMO ARRIVATI QUI
+				"push "+n.entry.offset, "add", // compute address of "id" declaration
+				"lw", // load address of "id" function
+				"js"  // jump to popped address (saving address of subsequent instruction in $ra)
+		);
+	}
 }
