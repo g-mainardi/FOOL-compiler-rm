@@ -232,12 +232,12 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		if (print) printVarAndProdName(c);
 
 		// Se la classe eredita da un'altra, gli ID dei campi iniziano dopo
-		int startingPoint = (c.EXTENDS() == null) ? 1 : 2;
+		int declOffset = (c.EXTENDS() == null) ? 1 : 2;
 
 		// Fields visits
 		List<FieldNode> fieldlist = new ArrayList<>();
-		for (int i = startingPoint; i < c.ID().size(); i++) {
-			FieldNode f = new FieldNode(c.ID(i).getText(),(TypeNode) visit(c.type(i-1)));
+		for (int i = declOffset; i < c.ID().size(); i++) {
+			FieldNode f = new FieldNode(c.ID(i).getText(),(TypeNode) visit(c.type(i-declOffset)));
 			f.setLine(c.ID(i).getSymbol().getLine());
 			fieldlist.add(f);
 		}
