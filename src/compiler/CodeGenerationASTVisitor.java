@@ -382,4 +382,41 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 				"js"  // jump to popped address (saving address of subsequent instruction in $ra)
 		);
 	}
+
+	@Override
+	public String visitNode(NewNode n) {
+		if (print) printNode(n,n.id);
+		String argValueCode = null, argToHeap = null, getAR = null;
+		for (int i=0;i<n.argList.size();i++)
+			argValueCode=nlJoin(argValueCode,visit(n.argList.get(i)));
+		for (int i=n.argList.size()-1;i>=0;i--) {
+			argToHeap = nlJoin(
+					argToHeap,
+					// Metto nell'Heap
+					"lhp",
+					"sw",
+					// Incremento l'HP
+					"lhp",
+					"push 1",
+					"add",
+					"shp"
+			);
+		}
+
+		return nlJoin(
+				argValueCode,
+				argToHeap,
+				// Prendo valore a MEMSIZE - offset
+				"push "+(MEMSIZE+n.entry.offset),
+				"lw",
+				// Lo metto nell'Heap
+				"lhp",
+				"sw",
+				// Incremento l'HP
+				"lhp",
+				"push 1",
+				"add",
+				"shp"
+		);
+	}
 }
