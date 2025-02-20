@@ -5,6 +5,7 @@ import compiler.lib.*;
 import compiler.exc.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static compiler.lib.FOOLlib.*;
 import static svm.ExecuteVM.MEMSIZE;
@@ -294,7 +295,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 	@Override
 	public String visitNode(ClassNode n) {
 		if (print) printNode(n,n.id);
-		ArrayList<String> dispatchTable = new ArrayList<>();
+		List<String> dispatchTable = new ArrayList<>();
 		String dispatchTableCode = "";
 
 		for (MethodNode method : n.methodList) {
@@ -361,7 +362,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 
 	@Override
 	public String visitNode(ClassCallNode n) {
-		if (print) printNode(n);
+		if (print) printNode(n, n.refId+"."+n.methodId);
 
 		String argCode = null, getAR = null;
 		for (int i=n.argList.size()-1;i>=0;i--) argCode=nlJoin(argCode,visit(n.argList.get(i)));
@@ -412,6 +413,8 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 				// Lo metto nell'Heap
 				"lhp",
 				"sw",
+				// Pusho l'HP prima di incrementarlo
+				"lhp",
 				// Incremento l'HP
 				"lhp",
 				"push 1",
