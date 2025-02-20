@@ -217,6 +217,8 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	@Override
 	public Void visitNode(ClassCallNode n) throws VoidException {
 		printNode(n, n.refId + "." + n.methodId);
+		visit(n.classEntry);
+		visit(n.methodEntry);
 		for (Node arg : n.argList) visit(arg);
 		return null;
 	}
@@ -224,6 +226,7 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	@Override
 	public Void visitNode(NewNode n) throws VoidException {
 		printNode(n,n.id);
+		visit(n.entry);
 		for (Node arg : n.argList) visit(arg);
 		return null;
 	}

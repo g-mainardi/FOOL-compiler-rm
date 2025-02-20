@@ -4,8 +4,6 @@ import compiler.AST.*;
 import compiler.exc.*;
 import compiler.lib.*;
 
-import javax.management.relation.RelationTypeNotFoundException;
-
 import static compiler.TypeRels.*;
 
 //visitNode(n) fa il type checking di un Node n e ritorna:
@@ -267,7 +265,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(ClassCallNode n) throws TypeException {
 		if (print) printNode(n, n.refId + "." + n.methodId);
-		TypeNode t = visit(n.entry);
+		TypeNode t = visit(n.methodEntry);
 		if ( !(t instanceof ArrowTypeNode) )
 			throw new TypeException("Invocation of a non-method "+n.refId+"."+n.methodId,n.getLine());
 		ArrowTypeNode at = (ArrowTypeNode) t;

@@ -365,20 +365,20 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 
 		String argCode = null, getAR = null;
 		for (int i=n.argList.size()-1;i>=0;i--) argCode=nlJoin(argCode,visit(n.argList.get(i)));
-		for (int i = 0;i<n.nestingLevel-n.entry.nl;i++) getAR=nlJoin(getAR,"lw");
+		for (int i = 0; i<n.nestingLevel-n.methodEntry.nl; i++) getAR=nlJoin(getAR,"lw");
 		return nlJoin(
-				"lfp", // load Control Link (pointer to frame of function "id" caller)
-				argCode, // generate code for argument expressions in reversed order
+				"lfp", // load Control Link (pointer to frame of method "id1.id2()" caller)
+				argCode,      // generate code for argument expressions in reversed order
 				"lfp", getAR, // retrieve address of frame containing "id" declaration
-				"push "+n.entry.offset, "add", // compute address of "id" declaration
+				          	  // by following the static chain (of Access Links)
+				"push "+n.classEntry.offset, "add", // compute address of "id" declaration
 				"lw", // load value of "id" variable
-				// by following the static chain (of Access Links)
 				"stm", // set $tm to popped value (with the aim of duplicating top of stack)
-				"ltm", // load Access Link (pointer to frame of function "id" declaration)
+				"ltm", // load Access Link (object pointer to frame of class "id" declaration)
 				"ltm", // duplicate top of stack
-				// SIAMO ARRIVATI QUI
-				"push "+n.entry.offset, "add", // compute address of "id" declaration
-				"lw", // load address of "id" function
+				"lw",
+				"push "+n.methodEntry.offset, "add", // compute address of "id" declaration
+				"lw", // load address of "id" method
 				"js"  // jump to popped address (saving address of subsequent instruction in $ra)
 		);
 	}
