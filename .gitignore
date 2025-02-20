@@ -34,3 +34,6 @@ gen
 ### Configurations ###
 *.xml
 *.iml
+
+## SVM generated assembly code
+*.asm
