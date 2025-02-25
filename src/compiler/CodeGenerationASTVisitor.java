@@ -384,7 +384,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 
 		String argCode = null, getAR = null;
 		for (int i=n.argList.size()-1;i>=0;i--) argCode=nlJoin(argCode,visit(n.argList.get(i)));
-		for (int i = 0; i<n.nestingLevel-n.methodEntry.nl; i++) getAR=nlJoin(getAR,"lw");
+		for (int i = 0; i<n.nestingLevel-n.classEntry.nl; i++) getAR=nlJoin(getAR,"lw");
 		return nlJoin(
 				"lfp", // load Control Link (pointer to frame of method "id1.id2()" caller)
 				argCode,      // generate code for argument expressions in reversed order
