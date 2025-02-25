@@ -45,8 +45,7 @@ public class TypeRels {
 	}
 
 	private static boolean isSubClass(TypeNode a, TypeNode b) {
-		return (a instanceof RefTypeNode)
-				&& (b instanceof RefTypeNode)
+		return areRefType(a, b)
 				&& recursiveSubClass(((RefTypeNode) a).id, ((RefTypeNode) b).id);
 	}
 
@@ -58,4 +57,34 @@ public class TypeRels {
 		return recursiveSubClass(superType.get(id1), id2);
 	}
 
+	public static TypeNode lowestCommonAncestor(TypeNode a, TypeNode b) {
+		// One EmptyType and the other RefType
+		if ((a instanceof EmptyTypeNode) && (b instanceof RefTypeNode))
+			return b;
+		if ((a instanceof RefTypeNode) && (b instanceof EmptyTypeNode))
+			return a;
+
+		// RefTypes: search Lowest Common
+		if (areRefType(a, b)) {
+			//todo
+		}
+
+		// Types bool/int
+		if (a instanceof IntTypeNode)
+			if (b instanceof BoolTypeNode || b instanceof IntTypeNode)
+				return new IntTypeNode();
+		if (a instanceof BoolTypeNode) {
+			if (b instanceof BoolTypeNode)
+				return new BoolTypeNode();
+			if (b instanceof IntTypeNode)
+				return new IntTypeNode();
+		}
+
+		// Every other case
+		return null;
+	}
+
+	private static boolean areRefType(TypeNode a, TypeNode b) {
+		return (a instanceof RefTypeNode) && (b instanceof RefTypeNode);
+	}
 }
