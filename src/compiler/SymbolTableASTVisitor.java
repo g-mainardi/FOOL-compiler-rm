@@ -363,6 +363,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		// Creo un STentry con: nesting level, Tipo e Offset
 		STentry entry = new STentry(nestingLevel, new ArrowTypeNode(parTypes, n.retType), decOffset++);
 		n.offset = entry.offset;
+		n.setType(entry.type);
 
 		// Inserisco l'ID del metodo + entry nella VirtualTable della classe
 		if (virtualTable.put(n.id, entry) != null) {
