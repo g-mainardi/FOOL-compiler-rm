@@ -344,7 +344,6 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
             }
             if (oldEntry == null) {
                 fieldEntry = new STentry(nestingLevel, field.getType(), fieldOffset--);
-                field.offset = fieldEntry.offset;
             } else {
                 if (oldEntry.type instanceof ArrowTypeNode) {
                     System.out.println("Cannot override method " + field.id + "() at line "
@@ -352,8 +351,8 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
                     stErrors++;
                 }
                 fieldEntry = new STentry(nestingLevel, field.getType(), oldEntry.offset);
-                field.offset = fieldEntry.offset;
             }
+            field.offset = fieldEntry.offset;
             virtualTable.put(field.id, fieldEntry);
             allFields.add(-fieldEntry.offset - 1, field.getType());
         }
