@@ -359,8 +359,13 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		// Salvo l'offset di questo livello prima di resettare per il prossimo
 		int prevNLDecOffset = decOffset;
 		decOffset = allMethods.size();
+		Set<String> newMethods = new HashSet<>();
 
 		for (MethodNode method : n.methodList) {
+			if (!newMethods.add(method.id)) {
+				System.out.println("Method id " +  method.id + " at line " + method.getLine() + " already declared");
+				stErrors++;
+			}
 			visit(method);
 			allMethods.add(method.offset, (ArrowTypeNode) method.getType());
 		}
@@ -385,16 +390,26 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		List<TypeNode> parTypes = new ArrayList<>();
 		for (ParNode par : n.parList) parTypes.add(par.getType());
 
-		// Creo un STentry con: nesting level, Tipo e Offset
-		STentry entry = new STentry(nestingLevel, new ArrowTypeNode(parTypes, n.retType), decOffset++);
-		n.offset = entry.offset;
-		n.setType(entry.type);
+		STentry oldEntry = virtualTable.get(n.id);
+		STentry methodEntry = null;
 
-		// Inserisco l'ID del metodo + entry nella VirtualTable della classe
-		if (virtualTable.put(n.id, entry) != null) {
-			System.out.println("Method id " +  n.id + " at line " + n.getLine() + " already declared");
-			stErrors++;
+		if (oldEntry == null) {
+			// Creo un STentry con: nesting level, Tipo e Offset
+			methodEntry = new STentry(nestingLevel, new ArrowTypeNode(parTypes, n.retType), decOffset++);
+		} else {
+			if (!(oldEntry.type instanceof ArrowTypeNode)) {
+				System.out.println("Cannot override field " + n.id + " at line "
+						+ n.getLine() + " with method " + n.id +"()");
+				stErrors++;
+			}
+			methodEntry = new STentry(nestingLevel, oldEntry.type, oldEntry.offset);
 		}
+
+		n.offset = methodEntry.offset;
+		n.setType(methodEntry.type);
+
+		// Inserisco l'ID del metodo + entry nella VirtualTable della classe o rimpiazzo se c'era già
+		virtualTable.put(n.id, methodEntry);
 
 		nestingLevel++;
 		Map<String, STentry> methodScope = new HashMap<>();
