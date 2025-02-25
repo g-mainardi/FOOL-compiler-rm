@@ -12,7 +12,7 @@ import static svm.ExecuteVM.MEMSIZE;
 
 public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidException> {
 
-	List<List<String>> dispatchTables = new ArrayList<>();
+	private final List<List<String>> dispatchTables = new ArrayList<>();
 
   CodeGenerationASTVisitor() {}
   CodeGenerationASTVisitor(boolean debug) {super(false,debug);} //enables print for debugging
@@ -311,12 +311,20 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 		for (MethodNode method : n.methodList) {
 			visit(method);
 			String methodLabel = method.label;
-			dispatchTable.add(method.offset, methodLabel);
+			int methodOffset = method.offset;
+			boolean override = methodOffset < dispatchTable.size();
+			if(override) {
+				dispatchTable.set(methodOffset, methodLabel);
+			} else {
+				dispatchTable.add(methodOffset, methodLabel);
+			}
+		}
 
+		for (var method : dispatchTable) {
 			dispatchTableCode = nlJoin(
 					dispatchTableCode,
 					// Memorizzo l'indirizzo del metodo nell'Heap
-					"push " + methodLabel,
+					"push " + method,
 					"lhp",
 					"sw",
 					// Incremento l'HP
