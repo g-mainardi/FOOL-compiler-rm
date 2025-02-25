@@ -240,6 +240,9 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(ClassNode n) throws TypeException {
 		if (print) printNode(n, n.id);
+		if (n.superId != null) {
+			superType.put(n.id, n.superId);
+		}
 		for (MethodNode method : n.methodList) {
 			visit(method);
 		}
