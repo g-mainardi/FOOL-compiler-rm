@@ -315,6 +315,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		}
 		// Creo un STentry con: nesting level, liste dei tipi (campi e metodi) e Offset
 		STentry entry = new STentry(0, new ClassTypeNode(allFields, allMethods), decOffset--);
+		n.setType(entry.type);
 
 		// Inserisco il mio ID + entry nella SymbolTable
 		if (globalSymTable.put(n.id, entry) != null) {

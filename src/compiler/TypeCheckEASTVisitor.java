@@ -241,10 +241,26 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	public TypeNode visitNode(ClassNode n) throws TypeException {
 		if (print) printNode(n, n.id);
 		if (n.superId != null) {
-			superType.put(n.id, n.superId);
+			TypeRels.superType.put(n.id, n.superId);
 		}
+
 		for (MethodNode method : n.methodList) {
 			visit(method);
+		}
+
+		if (n.superId != null) {
+			ClassTypeNode type = (ClassTypeNode) n.getType();
+			ClassTypeNode superType = (ClassTypeNode) n.superEntry.type;
+			for (int i = 0; i < superType.allFields.size(); i++) {
+				if (!isSubtype(type.allFields.get(i), superType.allFields.get(0))) {
+					throw new TypeException("Override field needs to be subtype", n.getLine());
+				}
+			}
+			for (int i = 0; i < superType.allMethods.size(); i++) {
+				if (!isSubtype(type.allMethods.get(i), superType.allMethods.get(0))) {
+					throw new TypeException("Override method needs to be subtype", n.getLine());
+				}
+			}
 		}
 		return null;
 	}
