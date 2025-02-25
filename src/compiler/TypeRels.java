@@ -65,19 +65,24 @@ public class TypeRels {
 			return a;
 
 		// RefTypes: search Lowest Common
-		if (areRefType(a, b)) {
-			//todo
+		if ((a instanceof RefTypeNode) && (b instanceof RefTypeNode)) {
+			if (isSubClass(a, b)) return b;
+			if (isSubClass(b, a)) return a;
+			RefTypeNode firstType = ((RefTypeNode) a);
+			while(superType.containsKey(firstType.id)) {
+				firstType = new RefTypeNode(superType.get(firstType.id));
+				if (isSubClass(b, firstType)) return b;
+			}
 		}
 
 		// Types bool/int
-		if (a instanceof IntTypeNode)
+		if (a instanceof IntTypeNode) {
 			if (b instanceof BoolTypeNode || b instanceof IntTypeNode)
 				return new IntTypeNode();
+		}
 		if (a instanceof BoolTypeNode) {
-			if (b instanceof BoolTypeNode)
-				return new BoolTypeNode();
-			if (b instanceof IntTypeNode)
-				return new IntTypeNode();
+			if (b instanceof BoolTypeNode) return new BoolTypeNode();
+			if (b instanceof IntTypeNode) return new IntTypeNode();
 		}
 
 		// Every other case
