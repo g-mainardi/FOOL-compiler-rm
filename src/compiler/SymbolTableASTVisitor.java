@@ -306,6 +306,13 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		// Array vuoto per i tipi dei metodi
 		List<ArrowTypeNode> allMethods = new ArrayList<>();
 
+		if (n.superId != null) {
+			STentry superClassEntry = globalSymTable.get(n.superId);
+			n.superEntry = superClassEntry;
+			ClassTypeNode classType = (ClassTypeNode) superClassEntry.type;
+            allFields.addAll(classType.allFields);
+			allMethods.addAll(classType.allMethods);
+		}
 		// Creo un STentry con: nesting level, liste dei tipi (campi e metodi) e Offset
 		STentry entry = new STentry(0, new ClassTypeNode(allFields, allMethods), decOffset--);
 
@@ -317,14 +324,31 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 
 		nestingLevel++;
 		Map<String, STentry> virtualTable = new HashMap<>();
+		if (n.superId != null) {
+			Map<String, STentry> superClassTable = classTable.get(n.superId);
+			virtualTable.putAll(superClassTable);
+		}
 		symTable.add(virtualTable);
 		classTable.put(n.id, virtualTable);
 
-		int fieldOffset = -1;
+		int fieldOffset = -allFields.size() -1;
 		for (FieldNode field : n.fieldList) {
 			if (print) printNode(field);
-			STentry fieldEntry = new STentry(nestingLevel, field.getType(), fieldOffset--);
-			if (virtualTable.put(field.id, fieldEntry) != null) {
+			STentry oldEntry = virtualTable.get(field.id);
+			STentry fieldEntry = null;
+            if (oldEntry == null) {
+                fieldEntry = new STentry(nestingLevel, field.getType(), fieldOffset--);
+            } else {
+                if (oldEntry.type instanceof ArrowTypeNode) {
+					System.out.println("Cannot override method " + field.id + "() at line "
+							+ field.getLine() + " with field " + field.id);
+					stErrors++;
+                } else {
+                    fieldEntry = new STentry(nestingLevel, field.getType(), oldEntry.offset);
+                }
+            }
+
+            if (virtualTable.put(field.id, fieldEntry) != null) {
 				System.out.println("Field id " +  field.id + " at line " + field.getLine() + " already declared");
 				stErrors++;
 			}
@@ -333,7 +357,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 
 		// Salvo l'offset di questo livello prima di resettare per il prossimo
 		int prevNLDecOffset = decOffset;
-		decOffset = 0;
+		decOffset = allMethods.size();
 
 		for (MethodNode method : n.methodList) {
 			visit(method);
