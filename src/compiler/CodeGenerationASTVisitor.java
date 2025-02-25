@@ -12,6 +12,8 @@ import static svm.ExecuteVM.MEMSIZE;
 
 public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidException> {
 
+	List<List<String>> dispatchTables = new ArrayList<>();
+
   CodeGenerationASTVisitor() {}
   CodeGenerationASTVisitor(boolean debug) {super(false,debug);} //enables print for debugging
 
@@ -298,6 +300,12 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 	public String visitNode(ClassNode n) {
 		if (print) printNode(n,n.id);
 		List<String> dispatchTable = new ArrayList<>();
+		dispatchTables.add(dispatchTable);
+		if (n.superId != null) {
+			List<String> superMethods = dispatchTables.get(-n.superEntry.offset - 2);
+			dispatchTable.addAll(superMethods);
+		}
+
 		String dispatchTableCode = "";
 
 		for (MethodNode method : n.methodList) {
