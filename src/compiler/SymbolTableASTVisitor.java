@@ -332,29 +332,31 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		symTable.add(virtualTable);
 		classTable.put(n.id, virtualTable);
 
-		int fieldOffset = -allFields.size() -1;
-		Set<String> newFields = new HashSet<>();
-		for (FieldNode field : n.fieldList) {
-			if (print) printNode(field);
-			STentry oldEntry = virtualTable.get(field.id);
-			STentry fieldEntry = null;
+        int fieldOffset = -allFields.size() - 1;
+        Set<String> newFields = new HashSet<>();
+        for (FieldNode field : n.fieldList) {
+            if (print) printNode(field);
+            STentry oldEntry = virtualTable.get(field.id);
+            STentry fieldEntry;
             if (!newFields.add(field.id)) {
 				System.out.println("Field id " +  field.id + " at line " + field.getLine() + " already declared");
 				stErrors++;
             }
-			if (oldEntry == null) {
-				fieldEntry = new STentry(nestingLevel, field.getType(), fieldOffset--);
-			} else {
-				if (oldEntry.type instanceof ArrowTypeNode) {
-					System.out.println("Cannot override method " + field.id + "() at line "
-							+ field.getLine() + " with field " + field.id);
-					stErrors++;
-				}
-				fieldEntry = new STentry(nestingLevel, field.getType(), oldEntry.offset);
-			}
-			virtualTable.put(field.id, fieldEntry);
-			allFields.add(-fieldEntry.offset - 1, field.getType());
-		}
+            if (oldEntry == null) {
+                fieldEntry = new STentry(nestingLevel, field.getType(), fieldOffset--);
+                field.offset = fieldEntry.offset;
+            } else {
+                if (oldEntry.type instanceof ArrowTypeNode) {
+                    System.out.println("Cannot override method " + field.id + "() at line "
+                            + field.getLine() + " with field " + field.id);
+                    stErrors++;
+                }
+                fieldEntry = new STentry(nestingLevel, field.getType(), oldEntry.offset);
+                field.offset = fieldEntry.offset;
+            }
+            virtualTable.put(field.id, fieldEntry);
+            allFields.add(-fieldEntry.offset - 1, field.getType());
+        }
 
 		// Salvo l'offset di questo livello prima di resettare per il prossimo
 		int prevNLDecOffset = decOffset;
