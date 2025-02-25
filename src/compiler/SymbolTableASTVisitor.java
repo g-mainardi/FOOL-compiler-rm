@@ -450,7 +450,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		if (entry == null) {
 			System.out.println("Reference id " + n.refId + " at line " + n.getLine() + " not declared");
 			stErrors++;
-		} else {
+		} else if (entry.type instanceof RefTypeNode) {
 			n.classEntry = entry;
 			n.nestingLevel = nestingLevel;
 			// Prendo l'STentry del metodo dalla Class Table
@@ -463,6 +463,9 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 				// Se lo trovo, la salvo nel nodo
 				n.methodEntry = methodEntry;
 			}
+		} else {
+			System.out.println("Reference id " + n.refId + " at line " + n.getLine() + " is not a RefType");
+			stErrors++;
 		}
 
 		// Visito gli argomenti del metodo
