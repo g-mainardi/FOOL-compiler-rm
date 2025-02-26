@@ -49,10 +49,10 @@ public class TypeRels {
 	}
 
 	private static boolean recursiveSubClass(String id1, String id2) {
+		if(id1.equals(id2))
+			return true;
 		if (!superType.containsKey(id1))
 			return false;
-		if (superType.get(id1).equals(id2))
-			return true;
 		return recursiveSubClass(superType.get(id1), id2);
 	}
 
