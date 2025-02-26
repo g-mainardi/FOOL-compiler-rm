@@ -3,7 +3,6 @@ package compiler;
 import compiler.AST.*;
 import compiler.lib.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,7 @@ public class TypeRels {
 	public static boolean isSubtype(TypeNode a, TypeNode b) {
 		return isSubClass(a, b)
 				|| isSubFunc(a, b)
-				|| a.getClass().equals(b.getClass())
+				|| (!areRefType(a, b) && a.getClass().equals(b.getClass()))
 				|| ((a instanceof BoolTypeNode) && (b instanceof IntTypeNode))
 				|| ((a instanceof EmptyTypeNode) && (b instanceof RefTypeNode));
 	}
@@ -58,31 +57,15 @@ public class TypeRels {
 	}
 
 	public static TypeNode lowestCommonAncestor(TypeNode a, TypeNode b) {
-		// One EmptyType and the other RefType
-		if ((a instanceof EmptyTypeNode) && (b instanceof RefTypeNode))
-			return b;
-		if ((a instanceof RefTypeNode) && (b instanceof EmptyTypeNode))
-			return a;
+		if (isSubtype(a, b)) return b;
+		if (isSubtype(b, a)) return a;
 
 		// RefTypes: search Lowest Common
-		if ((a instanceof RefTypeNode) && (b instanceof RefTypeNode)) {
-			if (isSubClass(a, b)) return b;
-			if (isSubClass(b, a)) return a;
-			RefTypeNode firstType = ((RefTypeNode) a);
-			while(superType.containsKey(firstType.id)) {
+		if ((a instanceof RefTypeNode firstType) && (b instanceof RefTypeNode)) {
+            while(superType.containsKey(firstType.id)) {
 				firstType = new RefTypeNode(superType.get(firstType.id));
-				if (isSubClass(b, firstType)) return b;
+				if (isSubClass(b, firstType)) return firstType;
 			}
-		}
-
-		// Types bool/int
-		if (a instanceof IntTypeNode) {
-			if (b instanceof BoolTypeNode || b instanceof IntTypeNode)
-				return new IntTypeNode();
-		}
-		if (a instanceof BoolTypeNode) {
-			if (b instanceof BoolTypeNode) return new BoolTypeNode();
-			if (b instanceof IntTypeNode) return new IntTypeNode();
 		}
 
 		// Every other case
