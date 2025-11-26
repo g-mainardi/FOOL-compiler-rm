@@ -1,7 +1,7 @@
 plugins {
     scala
     application
-    id("antlr") // Il plugin ufficiale gestisce le convenzioni per noi
+    id("antlr")
 }
 
 repositories {
@@ -27,45 +27,37 @@ application {
     mainClass.set("compiler.Test")
 }
 
-// --- CONFIGURAZIONE PULITA ---
-
-// Non tocchiamo outputDirectory. Lasciamo che vada in build/generated/sources/antlr/...
-// Il plugin Antlr lo fa di default.
-
+// --- ANTLR CONFIGURATION ---
 tasks.generateGrammarSource {
     maxHeapSize = "64m"
-    // Questo è l'unico parametro "obbligatorio" per dire ad ANTLR il package java
     arguments = arguments + listOf("-visitor", "-no-listener")
 }
 
+// --- SOURCES CONFIGURATION ---
 sourceSets {
     main {
-        // SCALA: Convenzione standard src/main/scala
-        withConvention(ScalaSourceSet::class) {
-            scala.srcDirs("src/main/scala")
-        }
-
-        // JAVA: Qui sta la magia.
-        // NON usiamo setSrcDirs (che cancella i default).
-        // Il plugin 'antlr' aggiunge automaticamente la sua cartella di output qui.
-        // Noi dobbiamo solo assicurarci che 'src/main/java' sia incluso.
-        // Di default Gradle include src/main/java, ma il plugin Scala a volte fa il prepotente.
-
-        // Per sicurezza, facciamo così (ADDITIVO):
+        // 'java' as extension, not convention
         java {
-            srcDir("src/main/java")
+            // srcDir is additive (it does not clear other paths)
+            srcDir("build/generated/sources/antlr/main")
         }
     }
 }
 
-// Configurazione encoding
+// --- COMPILE CONFIGURATION ---
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
-    // Questo è il segreto: diciamo esplicitamente che la compilazione Java
-    // dipende dalla generazione della grammatica.
+    // To ensure ANTLR runs before Java
     dependsOn(tasks.generateGrammarSource)
 }
 
 tasks.withType<ScalaCompile>().configureEach {
     scalaCompileOptions.additionalParameters = listOf("-encoding", "UTF-8")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }
