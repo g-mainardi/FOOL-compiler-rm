@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static compiler.lib.FOOLlib.*;
-import static svm.ExecuteVM.MEMSIZE;
+import static compiler.svm.ExecuteVM.MEMSIZE;
 
 public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidException> {
 

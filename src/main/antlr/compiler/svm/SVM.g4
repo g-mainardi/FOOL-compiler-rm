@@ -1,6 +1,8 @@
 grammar SVM;
 
-@parser::header {
+@header {
+package compiler.svm;
+
 import java.util.*;
 }
 
