@@ -2,6 +2,7 @@ package compiler;
 
 import java.io.*;
 import java.nio.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -22,7 +23,13 @@ public class Test {
         Path path = Paths.get(inputFilePath);
 
         String fileName = path.getFileName().toString();
+        Path outputPath = Paths.get("./fool_examples/compiledASM/" + fileName + ".asm");
 
+        if (outputPath.getParent() != null) {
+            Files.createDirectories(outputPath.getParent());
+        }
+
+        String outputFilePath = outputPath.toString();
     	CharStream chars = CharStreams.fromFileName(inputFilePath);
     	FOOLLexer lexer = new FOOLLexer(chars);
     	CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -67,13 +74,13 @@ public class Test {
 
     	System.out.println("Generating code.");
     	String code = new CodeGenerationASTVisitor().visit(ast);        
-    	BufferedWriter out = new BufferedWriter(new FileWriter(fileName+".asm")); 
+    	BufferedWriter out = new BufferedWriter(new FileWriter(outputFilePath));
     	out.write(code);
     	out.close(); 
     	System.out.println();
 
     	System.out.println("Assembling generated code.");
-    	CharStream charsASM = CharStreams.fromFileName(fileName+".asm");
+    	CharStream charsASM = CharStreams.fromFileName(outputFilePath);
     	SVMLexer lexerASM = new SVMLexer(charsASM);
     	CommonTokenStream tokensASM = new CommonTokenStream(lexerASM);
     	SVMParser parserASM = new SVMParser(tokensASM);
