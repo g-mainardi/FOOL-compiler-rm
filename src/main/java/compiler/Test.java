@@ -15,22 +15,27 @@ import compiler.svm.*;
 public class Test {
     public static void main(String[] args) throws Exception {
 
+        // Input file path resolution and security check
         if (args.length == 0) {
             System.out.println("Error: Missing input file name.");
             System.exit(1);
         }
-        String inputFilePath = args[0];
-        Path path = Paths.get(inputFilePath);
+        Path baseDir = Paths.get(".").toAbsolutePath().normalize();
+        String inputFile = args[0];
+        Path inputFilePath = baseDir.resolve(inputFile).normalize();
+        if (!inputFilePath.startsWith(baseDir)) {
+            throw new SecurityException("Access denied! You cannot exit from project folder: " + inputFile);
+        }
+        String fileName = inputFilePath.getFileName().toString();
 
-        String fileName = path.getFileName().toString();
+        // Output file path
         Path outputPath = Paths.get("./foolExamples/compiledASM/" + fileName + ".asm");
-
         if (outputPath.getParent() != null) {
             Files.createDirectories(outputPath.getParent());
         }
-
         String outputFilePath = outputPath.toString();
-    	CharStream chars = CharStreams.fromFileName(inputFilePath);
+
+        CharStream chars = CharStreams.fromFileName(inputFile);
     	FOOLLexer lexer = new FOOLLexer(chars);
     	CommonTokenStream tokens = new CommonTokenStream(lexer);
     	FOOLParser parser = new FOOLParser(tokens);
