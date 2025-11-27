@@ -1,6 +1,10 @@
 package compiler;
 
 import java.io.*;
+import java.nio.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import compiler.lib.*;
@@ -14,9 +18,12 @@ public class Test {
             System.out.println("Error: Missing input file name.");
             System.exit(1);
         }
+        String inputFilePath = args[0];
+        Path path = Paths.get(inputFilePath);
 
-        String fileName = args[0];
-        CharStream chars = CharStreams.fromFileName(fileName);
+        String fileName = path.getFileName().toString();
+
+    	CharStream chars = CharStreams.fromFileName(inputFilePath);
     	FOOLLexer lexer = new FOOLLexer(chars);
     	CommonTokenStream tokens = new CommonTokenStream(lexer);
     	FOOLParser parser = new FOOLParser(tokens);
