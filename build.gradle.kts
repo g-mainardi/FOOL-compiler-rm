@@ -55,10 +55,15 @@ tasks.withType<ScalaCompile>().configureEach {
     scalaCompileOptions.additionalParameters = listOf("-encoding", "UTF-8")
 }
 
-tasks.run<JavaExec> {
-    args("foolExamples/prova.fool")
+// --- RUN CONFIGURATION ---
+tasks.named<JavaExec>("run") {
+    @Suppress("UselessCallOnNotNull")
+    if (args.isNullOrEmpty()) {
+        args = listOf("foolExamples/prova.fool")
+    }
 }
 
+// --- TEST CONFIGURATION ---
 tasks.test {
     useJUnitPlatform()
     testLogging {
