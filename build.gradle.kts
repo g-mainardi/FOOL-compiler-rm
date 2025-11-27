@@ -56,7 +56,7 @@ tasks.withType<ScalaCompile>().configureEach {
 }
 
 tasks.run<JavaExec> {
-    args("Esempi FOOL/prova.fool")
+    args("foolExamples/prova.fool")
 }
 
 tasks.test {
