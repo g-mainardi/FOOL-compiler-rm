@@ -9,10 +9,14 @@ import compiler.svm.*;
 
 public class Test {
     public static void main(String[] args) throws Exception {
-   			
-    	String fileName = "ESEMPI FOOL/prova.fool";
 
-    	CharStream chars = CharStreams.fromFileName(fileName);
+        if (args.length == 0) {
+            System.out.println("Error: Missing input file name.");
+            System.exit(1);
+        }
+
+        String fileName = args[0];
+        CharStream chars = CharStreams.fromFileName(fileName);
     	FOOLLexer lexer = new FOOLLexer(chars);
     	CommonTokenStream tokens = new CommonTokenStream(lexer);
     	FOOLParser parser = new FOOLParser(tokens);

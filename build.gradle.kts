@@ -55,6 +55,10 @@ tasks.withType<ScalaCompile>().configureEach {
     scalaCompileOptions.additionalParameters = listOf("-encoding", "UTF-8")
 }
 
+tasks.run<JavaExec> {
+    args("Esempi FOOL/prova.fool")
+}
+
 tasks.test {
     useJUnitPlatform()
     testLogging {
